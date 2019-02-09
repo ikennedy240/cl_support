@@ -1,0 +1,10 @@
+unit type,regex
+basement,basement
+single family home,single\sfamily\shome|home|cottage
+apartment,apartment|apartments|1\sbedroom|loft
+condo,condo
+townhome,townhome
+duplex,duplex
+triplex,triplex
+studio apartment,studio\sapartment|studio
+accessory unit,accessory\sunit
