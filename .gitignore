@@ -35,9 +35,8 @@ vignettes/*.pdf
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
 
-# data files
+# data formats
 .csv
-.txt
 
 # mac system files
 .DS_store
