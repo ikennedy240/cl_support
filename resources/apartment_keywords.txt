@@ -1,10 +1,19 @@
 unit type,regex
+
 basement,basement
+
 single family home,(single\s+)?family\s+ho(me|use)|cottage|(?!(apartment|apt|apart)\s+)ho(me|use)
+
 apartment,\s+apt(\s+|\.)|apartment|(1|one)\s+(br|bd|bedroom)|loft
+
 condo,condo
+
 townhome,townho(use|me)
+
 duplex,duplex
+
 triplex,triplex
-studio apartment,studio
+
+studio apartment,(?!(fitness|art)\s+)studio
+
 accessory unit,accessory\sunit

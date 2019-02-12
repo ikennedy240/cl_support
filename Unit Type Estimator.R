@@ -1,16 +1,32 @@
 library(readr)
 library(stringr)
 library(dplyr)
-cl_data_path = 'data/cl_full.csv' # set the path to your CL extract
+cl_data_path = 'data/seattle_sample.csv' # set the path to your CL extract
 df <- read_csv(cl_data_path) # read data using readr
 apart_keywords <- read_csv("resources/apartment_keywords.txt") # grab a keyword file I made
 df['unit_type'] <- 'none' # set the base value to none
+
+for(i in 1:dim(apart_keywords)[[1]]){ # loop through types
+  # I'm using this one to look at overlap between the regex categories, to find edge cases
+  # use one after this for actual categorization
+  df$unit_type <- if_else(
+    str_detect(df$listingText, regex(apart_keywords[[i,2]], ignore_case=TRUE)),
+    if_else(df$unit_type == 'none', apart_keywords[[i,1]], paste(df$unit_type, apart_keywords[[i,1]], sep="+")),
+    df$unit_type
+  )
+
+}
+
 for(i in 1:dim(apart_keywords)[[1]]){ # loop through types
   # I'm using the loop here to ensure mutual exclusivity here: I've ordered the keyword list so that
   # it starts with broader categories and gets more specific. This is, I think, a simple and useful
   # heuristic, but it's not necessarily perfect
   df$unit_type <- if_else(
-    str_detect(df$listingText, apart_keywords[[i,2]]),apart_keywords[[i,1]],df$unit_type) 
+    str_detect(df$listingText, regex(apart_keywords[[i,2]], ignore_case=TRUE)),
+    apart_keywords[[i,1]],
+    df$unit_type
+  )
+  
 }
 
 df %>% group_by(GEOID10) %>% # group by tract
