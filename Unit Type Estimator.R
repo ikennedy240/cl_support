@@ -2,6 +2,9 @@ library(readr)
 library(stringr)
 library(dplyr)
 library(e1071)
+library(tm)
+library(RTextTools)
+library(caret)
 cl_data_path = 'data/seattle_sample.csv' # set the path to your CL extract
 df <- read_csv(cl_data_path) # read data using readr
 
@@ -52,7 +55,12 @@ for(i in 1:dim(apart_keywords)[[1]]){
   df <- mutate(df, listingText_noKW = str_remove_all(listingText, regex(apart_keywords[[i,2]])))
 }
 
-# Remove random non-critical terms such as numbers, punctation, and stopwords from the corpus
+Encoding(df$listingText_noKW) <- "UTF-16"
+
+# For now we will only use things we have the unit type for to test.
+df <- df[!is.na(df$unit_type),]
+
+# Remove non-critical terms such as numbers, punctation, and stopwords from the corpus
 corp <- Corpus(VectorSource(df$listingText_noKW))
 corp <- corp %>%
   tm_map(content_transformer(tolower)) %>%
@@ -61,17 +69,20 @@ corp <- corp %>%
   tm_map(removeWords, stopwords(kind="en")) %>%
   tm_map(stripWhitespace)
 
-dtm <- DocumentTermMatrix(corp)
-df.train <- df[1:15000,]
-df.test <- df[15001:20000,]
-dtm.train <- dtm[1:15000,]
-dtm.test <- dtm[15001:20000,]
-corp.train <- corp[1:15000]
-corp.test <- corp[15001:20000]
+n_train = floor(0.75*nrow(df))
+n_test = nrow(df) - n_train
 
-# Remove terms in <10 listings
-dtm.train.nb <- DocumentTermMatrix(corp.train, control=list(dictionary = findFreqTerms(dtm.train, 10)))
-dtm.test.nb <- DocumentTermMatrix(corp.test, control=list(dictionary = findFreqTerms(dtm.train, 10)))
+dtm <- DocumentTermMatrix(corp)
+df.train <- df[1:n_train,]
+df.test <- df[(n_train+1):(n_train+n_test),]
+dtm.train <- dtm[1:n_train,]
+dtm.test <- dtm[(n_train+1):(n_train+n_test),]
+corp.train <- corp[1:n_train]
+corp.test <- corp[(n_train+1):(n_train+n_test)]
+
+# Remove terms in <150 (1%) of listings
+dtm.train.nb <- DocumentTermMatrix(corp.train, control=list(dictionary = findFreqTerms(dtm.train, 150)))
+dtm.test.nb <- DocumentTermMatrix(corp.test, control=list(dictionary = findFreqTerms(dtm.train, 150)))
 
 convert_count <- function(x) {
   y <- ifelse(x > 0, 1,0)
@@ -80,6 +91,9 @@ convert_count <- function(x) {
 }
 trainNB <- apply(dtm.train.nb, 2, convert_count)
 testNB <- apply(dtm.test.nb, 2, convert_count)
-classifierNB <- naiveBayes(trainNB, df.train$unit_type, laplace=1)
+classifierNB <- naiveBayes(trainNB, as.factor(df.train$unit_type), laplace=1)
 pred <- predict(classifierNB, newdata=testNB)
-table("pred"=pred, "actual"=a)
+View(table("Predictions"=pred, "Actual"=df.test$unit_type))
+
+conf <- confusionMatrix(pred, as.factor(df.test$unit_type))
+
