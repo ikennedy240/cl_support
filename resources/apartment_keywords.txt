@@ -1,8 +1,6 @@
 unit type,regex
 
-basement,basement
-
-single family home,(single\s+)?family\s+ho(me|use)|cottage|(?!(apartment|apt|apart)\s+)ho(me|use)
+single family home,(single\s+)?family\s+ho(me|use)|cottage|(?<!(apartment|apt|apart) ?)ho(me|use)
 
 apartment,\s+apt(\s+|\.)|apartment|(1|one)\s+(br|bd|bedroom)|loft
 
@@ -12,8 +10,5 @@ townhome,townho(use|me)
 
 duplex,duplex
 
-triplex,triplex
+studio apartment,(?<!(yoga|fitness|art) ?)studio
 
-studio apartment,(?!(fitness|art)\s+)studio
-
-accessory unit,accessory\sunit

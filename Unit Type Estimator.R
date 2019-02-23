@@ -51,8 +51,9 @@ df %>% group_by(GEOID10) %>% # group by tract
 df$unit_type[df$unit_type=='none'] = NA
 
 # Remove all of the matching terms from the listing texts
+df <- mutate(df, listingText_noKW=listingText)
 for(i in 1:dim(apart_keywords)[[1]]){
-  df <- mutate(df, listingText_noKW = str_remove_all(listingText, regex(apart_keywords[[i,2]])))
+  df <- mutate(df, listingText_noKW = str_remove_all(listingText_noKW, regex(apart_keywords[[i,2]], ignore_case = TRUE)))
 }
 
 Encoding(df$listingText_noKW) <- "UTF-16"
@@ -69,6 +70,7 @@ corp <- corp %>%
   tm_map(removeWords, stopwords(kind="en")) %>%
   tm_map(stripWhitespace)
 
+# Split train and test set into the first 3/4 and last 1/4 respectfully
 n_train = floor(0.75*nrow(df))
 n_test = nrow(df) - n_train
 
@@ -97,3 +99,15 @@ View(table("Predictions"=pred, "Actual"=df.test$unit_type))
 
 conf <- confusionMatrix(pred, as.factor(df.test$unit_type))
 
+num_classes <- length(classifierNB$levels)
+probs <- read.table(text="", colClasses=append("character", rep("double", num_classes)), col.names=append("word", classifierNB$levels))
+for(i in 1:length(classifierNB[["tables"]])){
+  probs[nrow(probs)+1,] <- append(attributes(classifierNB$tables)$names[i],
+                                  classifierNB$tables[[i]][(num_classes+1):(num_classes*2)])
+}
+
+write.csv(probs, "data/word_probs.csv")
+
+write.csv(as.matrix(conf, what="xtabs"), "data/unittypeNB_xtabs.csv")
+write.csv(as.matrix(conf, what="overall"), "data/unittypeNB_overall.csv")
+write.csv(as.matrix(conf, what="classes"), "data/unittypeNB_accuracies.csv")

@@ -1,9 +1,7 @@
-"","apartment","basement","condo","duplex","single family home","studio apartment","townhome","triplex"
-"apartment",1685,0,19,3,85,116,30,0
-"basement",0,0,0,0,1,0,0,0
-"condo",154,0,114,2,16,43,14,0
-"duplex",113,0,10,69,19,31,17,7
-"single family home",225,7,31,4,358,62,55,4
-"studio apartment",429,0,4,0,20,785,22,0
-"townhome",73,0,0,0,2,10,98,0
-"triplex",23,0,4,4,11,13,3,1
+"","apartment","condo","duplex","single family home","studio apartment","townhome"
+"apartment",1535,23,4,75,182,38
+"condo",129,78,7,18,35,19
+"duplex",99,20,38,53,24,13
+"single family home",416,54,34,335,103,61
+"studio apartment",605,11,0,37,484,24
+"townhome",113,0,0,6,6,103
