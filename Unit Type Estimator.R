@@ -52,11 +52,20 @@ df$unit_type[df$unit_type=='none'] = NA
 
 # Remove all of the matching terms from the listing texts
 df <- mutate(df, listingText_noKW=listingText)
-for(i in 1:dim(apart_keywords)[[1]]){
+# We go in reverse order so we remove more specific keywords before the less specific ones
+# e.g. remove 'townhome' before we remove 'home'
+for(i in dim(apart_keywords)[[1]]:1){
   df <- mutate(df, listingText_noKW = str_remove_all(listingText_noKW, regex(apart_keywords[[i,2]], ignore_case = TRUE)))
+}
+# This version is for in place keyword removal, to save space.
+for(i in dim(apart_keywords)[[1]]:1){
+  df <- mutate(df, listingText = str_remove_all(listingText, regex(apart_keywords[[i,2]], ignore_case = TRUE)))
 }
 
 Encoding(df$listingText_noKW) <- "UTF-16"
+
+# Save the version with keyword assigned unit types and the keywords removed from the listing text.
+write.csv(df, "data/seattle_sample_kwd.csv")
 
 # For now we will only use things we have the unit type for to test.
 df <- df[!is.na(df$unit_type),]
